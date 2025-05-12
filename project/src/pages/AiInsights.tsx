@@ -9,13 +9,11 @@ import {
   Eye, 
   CheckCircle,
   AlertTriangle,
-  Clock,
-  HelpCircle
+  Clock
 } from 'lucide-react';
 import { Task, DuplicateTask, TaskType } from '../types';
 import { Chart as ChartJS, ArcElement, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
-import Joyride, { Step } from 'react-joyride';
 
 // Register ChartJS components
 ChartJS.register(ArcElement, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
@@ -26,35 +24,6 @@ const AiInsights = () => {
   const [showDuplicateDetails, setShowDuplicateDetails] = useState<string | null>(null);
   const [selectedTaskType, setSelectedTaskType] = useState<TaskType | 'all'>('all');
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [tourOpen, setTourOpen] = useState(false);
-  
-  const tourSteps: Step[] = [
-    {
-      target: '.main-navbar',
-      content: 'Use the navigation bar to access all major sections.',
-      placement: 'bottom',
-    },
-    {
-      target: '.insights-summary-cards',
-      content: 'These cards show key AI insights and metrics.',
-      placement: 'bottom',
-    },
-    {
-      target: '.insights-chart',
-      content: 'Visualize task duplication by type here.',
-      placement: 'top',
-    },
-    {
-      target: '.duplicate-list-table',
-      content: 'This table lists detected duplicate tasks.',
-      placement: 'top',
-    },
-    {
-      target: '.filter-dropdown',
-      content: 'Filter insights by task type.',
-      placement: 'left',
-    },
-  ];
   
   // Handle refresh
   const handleRefresh = () => {
@@ -310,7 +279,7 @@ const AiInsights = () => {
           <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-white opacity-5 rounded-full animate-float" style={{ animationDelay: '0s' }} />
           <div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-white opacity-5 rounded-full animate-float" style={{ animationDelay: '2s' }} />
         </div>
-        <div className="relative flex flex-col md:flex-row justify-between items-start md:items-center main-navbar">
+        <div className="relative flex flex-col md:flex-row justify-between items-start md:items-center">
           <div className="flex items-center">
             <div className="rounded-full bg-white/10 p-3 mr-4 backdrop-blur-sm">
               <Lightbulb size={24} className="text-white" />
@@ -337,7 +306,7 @@ const AiInsights = () => {
       </div>
 
       {/* Summary cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 insights-summary-cards">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-shadow duration-300 animate-scale-in group">
           <div className="flex items-center">
             <div className="rounded-full bg-hsbc-primary/10 p-3 mr-4 group-hover:scale-110 transition-transform duration-300">
@@ -376,7 +345,7 @@ const AiInsights = () => {
       </div>
 
       {/* Insights chart */}
-      <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 animate-fade-in insights-chart">
+      <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 animate-fade-in">
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-xl font-bold text-gray-800">Task Duplication by Type</h3>
           <div className="text-sm text-gray-500">
@@ -463,7 +432,7 @@ const AiInsights = () => {
               <select
                 value={selectedTaskType}
                 onChange={(e) => setSelectedTaskType(e.target.value as TaskType | 'all')}
-                className="filter-dropdown block w-full pl-4 pr-10 py-2.5 text-sm border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-hsbc-primary/20 focus:border-hsbc-primary transition-all duration-200"
+                className="block w-full pl-4 pr-10 py-2.5 text-sm border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-hsbc-primary/20 focus:border-hsbc-primary transition-all duration-200"
               >
                 <option value="all">All Task Types</option>
                 <option value="loan-approval">Loan Approval</option>
@@ -478,7 +447,7 @@ const AiInsights = () => {
         
         {filteredDuplicates.length > 0 ? (
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 duplicate-list-table">
+            <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -627,34 +596,6 @@ const AiInsights = () => {
           </div>
         )}
       </div>
-
-      {/* Onboarding Tour */}
-      {/* @ts-expect-error Joyride JSX type incompatibility workaround */}
-      <Joyride
-        steps={tourSteps}
-        run={tourOpen}
-        continuous
-        showSkipButton
-        showProgress
-        styles={{ options: { zIndex: 10000 } }}
-        callback={(data) => {
-          if (data.status === 'finished' || data.status === 'skipped') {
-            setTourOpen(false);
-          }
-        }}
-      />
-
-      {/* Subtle Help Icon Button in the top-right corner */}
-      <button
-        className="fixed top-6 right-8 z-50 bg-white/80 hover:bg-hsbc-primary/90 text-hsbc-primary hover:text-white rounded-full p-2 shadow transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-hsbc-primary group"
-        style={{ boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)' }}
-        onClick={() => setTourOpen(true)}
-        aria-label="Take a tour"
-        title="Take a tour"
-      >
-        <HelpCircle size={22} className="transition-colors duration-200" />
-        <span className="sr-only">Take a tour</span>
-      </button>
     </div>
   );
 };

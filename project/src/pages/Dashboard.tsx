@@ -24,12 +24,10 @@ import {
   Map,
   Filter,
   ChevronDown,
-  DollarSign,
-  HelpCircle
+  DollarSign
 } from 'lucide-react';
 import { Chart as ChartJS, ArcElement, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, PointElement, LineElement, RadialLinearScale } from 'chart.js';
 import { Bar, Pie, Line, Radar } from 'react-chartjs-2';
-import Joyride, { Step } from 'react-joyride';
 
 // Register ChartJS components
 ChartJS.register(ArcElement, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, PointElement, LineElement, RadialLinearScale);
@@ -37,46 +35,6 @@ ChartJS.register(ArcElement, CategoryScale, LinearScale, BarElement, Title, Tool
 const Dashboard = () => {
   const { tasks, duplicateTasks, metrics, refreshDuplicateDetection, loading } = useTasks();
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [tourOpen, setTourOpen] = useState(false);
-
-  // Joyride steps
-  const tourSteps: Step[] = [
-    {
-      target: '.main-navbar',
-      content: 'Use the navigation bar to access all major sections of BankFlowAI.',
-      placement: 'bottom',
-    },
-    {
-      target: '.dashboard-kpis',
-      content: 'These are your key performance indicators: total tasks, duplicates, time saved, and more.',
-      placement: 'bottom',
-    },
-    {
-      target: '.tasks-by-type-chart',
-      content: 'See the distribution of tasks by type here.',
-      placement: 'top',
-    },
-    {
-      target: '.tasks-by-status-chart',
-      content: 'This pie chart shows the status of all tasks.',
-      placement: 'top',
-    },
-    {
-      target: '.completion-trends-chart',
-      content: 'Track task completion rates and processing times over the last week.',
-      placement: 'top',
-    },
-    {
-      target: '.duplicates-over-time-chart',
-      content: 'Monitor how many duplicate tasks are detected each day.',
-      placement: 'top',
-    },
-    {
-      target: '.refresh-data-btn',
-      content: 'Click here to refresh your data and run duplicate detection.',
-      placement: 'right',
-    },
-  ];
 
   // Handle refresh
   const handleRefresh = () => {
@@ -154,40 +112,13 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6">
-      {/* Onboarding Tour */}
-      {/* @ts-expect-error Joyride JSX type incompatibility workaround */}
-      <Joyride
-        steps={tourSteps}
-        run={tourOpen}
-        continuous
-        showSkipButton
-        showProgress
-        styles={{ options: { zIndex: 10000 } }}
-        callback={(data) => {
-          if (data.status === 'finished' || data.status === 'skipped') {
-            setTourOpen(false);
-          }
-        }}
-      />
-      {/* Subtle Help Icon Button in the top-right corner */}
-      <button
-        className="fixed top-6 right-8 z-50 bg-white/80 hover:bg-hsbc-primary/90 text-hsbc-primary hover:text-white rounded-full p-2 shadow transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-hsbc-primary group"
-        style={{ boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)' }}
-        onClick={() => setTourOpen(true)}
-        aria-label="Take a tour"
-        title="Take a tour"
-      >
-        <HelpCircle size={22} className="transition-colors duration-200" />
-        <span className="sr-only">Take a tour</span>
-      </button>
-
       {/* Welcome banner with quick actions */}
       <div className="relative overflow-hidden bg-gradient-to-r from-hsbc-primary via-hsbc-dark to-hsbc-primary rounded-2xl shadow-xl p-8 animate-fade-in">
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-white opacity-5 rounded-full animate-float" style={{ animationDelay: '0s' }} />
           <div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-white opacity-5 rounded-full animate-float" style={{ animationDelay: '2s' }} />
         </div>
-        <div className="relative flex flex-col md:flex-row justify-between items-start md:items-center main-navbar">
+        <div className="relative flex flex-col md:flex-row justify-between items-start md:items-center">
           <div>
             <h1 className="text-3xl font-display font-bold text-white mb-3">Welcome to BankFlowAI</h1>
             <p className="text-white/90 text-lg max-w-2xl mb-4">
@@ -197,7 +128,7 @@ const Dashboard = () => {
               <button 
                 onClick={handleRefresh}
                 disabled={isRefreshing || loading}
-                className="inline-flex items-center px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all duration-200 refresh-data-btn"
+                className="inline-flex items-center px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all duration-200"
               >
                 <RefreshCw size={18} className={`mr-2 ${isRefreshing || loading ? 'animate-spin' : ''}`} />
                 Refresh Data
@@ -214,7 +145,7 @@ const Dashboard = () => {
       </div>
 
       {/* Key Performance Indicators */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 dashboard-kpis">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 animate-scale-in group">
           <div className="flex items-center">
             <div className="rounded-xl bg-hsbc-primary/10 p-3 mr-4 group-hover:scale-110 transition-transform duration-300">
@@ -330,7 +261,7 @@ const Dashboard = () => {
 
       {/* Performance Trends */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 animate-fade-in tasks-by-type-chart">
+        <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 animate-fade-in">
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center">
               <div className="rounded-lg bg-hsbc-primary/10 p-2 mr-3">
@@ -338,6 +269,14 @@ const Dashboard = () => {
               </div>
               <h2 className="text-lg font-bold text-gray-800">Tasks by Type</h2>
             </div>
+            <button 
+              onClick={handleRefresh}
+              className="text-sm text-hsbc-primary hover:text-hsbc-dark flex items-center px-3 py-1.5 rounded-lg hover:bg-hsbc-light/50 transition-all duration-200"
+              disabled={isRefreshing || loading}
+            >
+              <RefreshCw size={16} className={`mr-1.5 ${isRefreshing || loading ? 'animate-spin' : ''}`} />
+              Refresh
+            </button>
           </div>
           <div className="h-64">
             <Bar 
@@ -398,7 +337,7 @@ const Dashboard = () => {
         </div>
 
         {/* Tasks by Status Chart */}
-        <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 animate-fade-in tasks-by-status-chart">
+        <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 animate-fade-in">
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center">
               <div className="rounded-lg bg-hsbc-primary/10 p-2 mr-3">
@@ -448,7 +387,7 @@ const Dashboard = () => {
         </div>
 
         {/* Duplicates Detected Over Time Chart */}
-        <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 animate-fade-in duplicates-over-time-chart">
+        <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 animate-fade-in">
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center">
               <div className="rounded-lg bg-hsbc-accent/10 p-2 mr-3">
@@ -501,7 +440,7 @@ const Dashboard = () => {
         </div>
 
         {/* New Chart: Task Completion Trends */}
-        <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 animate-fade-in completion-trends-chart">
+        <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 animate-fade-in">
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center">
               <div className="rounded-lg bg-hsbc-info/10 p-2 mr-3">

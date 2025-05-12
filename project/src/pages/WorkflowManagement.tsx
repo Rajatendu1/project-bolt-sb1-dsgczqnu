@@ -12,12 +12,10 @@ import {
   Search,
   Check,
   Clock,
-  TrendingUp,
-  HelpCircle
+  TrendingUp
 } from 'lucide-react';
 import { Task, TaskType, TaskStatus } from '../types';
 import { createPortal } from 'react-dom';
-import Joyride, { Step } from 'react-joyride';
 
 const calculateTaskAge = (timestamp: string | number): { hours: number; minutes: number } => {
   const timestampNum = typeof timestamp === 'string' ? parseInt(timestamp, 10) : timestamp;
@@ -277,70 +275,15 @@ const WorkflowManagement = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [filterOpen]);
 
-  const [tourOpen, setTourOpen] = useState(false);
-  const tourSteps: Step[] = [
-    {
-      target: '.main-navbar',
-      content: 'Use the navigation bar to access all major sections.',
-      placement: 'bottom',
-    },
-    {
-      target: '.workflow-filters',
-      content: 'Filter and search tasks here.',
-      placement: 'bottom',
-    },
-    {
-      target: '.workflow-table',
-      content: 'This table shows all workflow tasks.',
-      placement: 'top',
-    },
-    {
-      target: '.add-task-btn',
-      content: 'Click here to add a new task.',
-      placement: 'left',
-    },
-    {
-      target: '.actions-column',
-      content: 'Edit or delete tasks using these actions.',
-      placement: 'left',
-    },
-  ];
-
   return (
-    <div className="space-y-6 relative">
-      {/* Onboarding Tour */}
-      {/* @ts-expect-error Joyride JSX type incompatibility workaround */}
-      <Joyride
-        steps={tourSteps}
-        run={tourOpen}
-        continuous
-        showSkipButton
-        showProgress
-        styles={{ options: { zIndex: 10000 } }}
-        callback={(data) => {
-          if (data.status === 'finished' || data.status === 'skipped') {
-            setTourOpen(false);
-          }
-        }}
-      />
-      {/* Subtle Help Icon Button in the top-right corner */}
-      <button
-        className="fixed top-6 right-8 z-50 bg-white/80 hover:bg-hsbc-primary/90 text-hsbc-primary hover:text-white rounded-full p-2 shadow transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-hsbc-primary group"
-        style={{ boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)' }}
-        onClick={() => setTourOpen(true)}
-        aria-label="Take a tour"
-        title="Take a tour"
-      >
-        <HelpCircle size={22} className="transition-colors duration-200" />
-        <span className="sr-only">Take a tour</span>
-      </button>
+    <div className="space-y-6">
       {/* Header section with gradient background */}
       <div className="relative overflow-hidden bg-gradient-to-r from-hsbc-primary via-hsbc-dark to-hsbc-primary rounded-2xl shadow-xl p-8 animate-fade-in">
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-white opacity-5 rounded-full animate-float" style={{ animationDelay: '0s' }} />
           <div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-white opacity-5 rounded-full animate-float" style={{ animationDelay: '2s' }} />
         </div>
-        <div className="relative flex flex-col md:flex-row justify-between items-start md:items-center main-navbar">
+        <div className="relative flex flex-col md:flex-row justify-between items-start md:items-center">
           <div>
             <h1 className="text-3xl font-display font-bold text-white mb-3">Workflow Management</h1>
             <p className="text-white/90 text-lg max-w-2xl">
@@ -349,7 +292,7 @@ const WorkflowManagement = () => {
           </div>
           <button
             onClick={() => setShowAddForm(true)}
-            className="add-task-btn mt-4 md:mt-0 inline-flex items-center px-6 py-3 border border-transparent rounded-xl shadow-lg text-sm font-medium text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-all duration-300 group"
+            className="mt-4 md:mt-0 inline-flex items-center px-6 py-3 border border-transparent rounded-xl shadow-lg text-sm font-medium text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-all duration-300 group"
           >
             <Plus size={20} className="mr-2 group-hover:scale-110 transition-transform duration-300" />
             Add New Task
@@ -358,7 +301,7 @@ const WorkflowManagement = () => {
       </div>
 
       {/* Search and Filter controls */}
-      <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 animate-fade-in workflow-filters" style={{ animationDelay: '0.1s' }}>
+      <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 animate-fade-in" style={{ animationDelay: '0.1s' }}>
         <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
           <div className="relative flex-1">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -491,7 +434,7 @@ const WorkflowManagement = () => {
           <div className="flex flex-col h-[calc(100vh-300px)]">
             {/* Table container with consistent structure */}
             <div className="relative flex-1 overflow-auto">
-              <table className="w-full border-collapse workflow-table">
+              <table className="w-full border-collapse">
                 <thead className="sticky top-0 z-10 bg-gray-50">
                   <tr>
                     <th className="sticky left-0 z-30 bg-gray-50 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[180px]">
@@ -512,7 +455,7 @@ const WorkflowManagement = () => {
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[150px]">
                       Performance
                     </th>
-                    <th className="sticky right-0 z-30 bg-gray-50 px-4 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[100px] actions-column">
+                    <th className="sticky right-0 z-30 bg-gray-50 px-4 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[100px]">
                       Actions
                     </th>
                   </tr>
@@ -717,7 +660,7 @@ const WorkflowManagement = () => {
                             )}
                           </div>
                         </td>
-                        <td className="sticky right-0 z-20 bg-white px-4 py-4 whitespace-nowrap w-[100px] shadow-[-2px_0_5px_-2px_rgba(0,0,0,0.1)] actions-column">
+                        <td className="sticky right-0 z-20 bg-white px-4 py-4 whitespace-nowrap w-[100px] shadow-[-2px_0_5px_-2px_rgba(0,0,0,0.1)]">
                           <div className="flex flex-col items-end space-y-2">
                             <div className="flex items-center space-x-1">
                               <button

@@ -17,52 +17,95 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // Check if user is already logged in on mount
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
+    const initializeAuth = async () => {
       try {
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
-        setIsAuthenticated(true);
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          const parsedUser = JSON.parse(storedUser);
+          // Validate user data structure
+          if (parsedUser && 
+              typeof parsedUser === 'object' && 
+              'username' in parsedUser && 
+              'name' in parsedUser && 
+              'role' in parsedUser) {
+            setUser(parsedUser);
+            setIsAuthenticated(true);
+          } else {
+            // Invalid user data structure
+            localStorage.removeItem('user');
+            setUser(null);
+            setIsAuthenticated(false);
+          }
+        }
       } catch (error) {
-        console.error('Error parsing stored user:', error);
+        console.error('Error initializing auth:', error);
         localStorage.removeItem('user');
+        setUser(null);
+        setIsAuthenticated(false);
+      } finally {
+        setLoading(false);
       }
-    }
-    setLoading(false);
+    };
+
+    initializeAuth();
   }, []);
 
-  // Login function - hardcoded for demo
+  // Login function with improved error handling
   const login = async (username: string, password: string): Promise<boolean> => {
-    // Simulate network request
+    if (loading) return false;
+    
     setLoading(true);
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        // Check credentials - hardcoded for hackathon
-        if (username === 'hsbc_admin' && password === 'Hackathon2025!') {
-          const userData = {
-            username: 'hsbc_admin',
-            name: 'HSBC Administrator',
-            role: 'Admin'
-          };
-          setUser(userData);
-          setIsAuthenticated(true);
-          localStorage.setItem('user', JSON.stringify(userData));
-          setLoading(false);
-          resolve(true);
-        } else {
-          setLoading(false);
-          resolve(false);
-        }
-      }, 800); // Simulate network delay
-    });
+    try {
+      // Simulate network request
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      // Check credentials - hardcoded for hackathon
+      if (username === 'hsbc_admin' && password === 'Hackathon2025!') {
+        const userData = {
+          username: 'hsbc_admin',
+          name: 'HSBC Administrator',
+          role: 'Admin'
+        };
+        setUser(userData);
+        setIsAuthenticated(true);
+        localStorage.setItem('user', JSON.stringify(userData));
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Login error:', error);
+      return false;
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Logout function
+  // Logout function with cleanup
   const logout = () => {
-    setUser(null);
-    setIsAuthenticated(false);
-    localStorage.removeItem('user');
+    setLoading(true);
+    try {
+      setUser(null);
+      setIsAuthenticated(false);
+      localStorage.removeItem('user');
+      // Clear any other auth-related data
+      localStorage.removeItem('bankflowai_tasks');
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  // Prevent context updates during loading
+  if (loading) {
+    return (
+      <AuthContext.Provider value={{ isAuthenticated: false, user: null, login, logout, loading: true }}>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-hsbc-primary"></div>
+        </div>
+      </AuthContext.Provider>
+    );
+  }
 
   return (
     <AuthContext.Provider value={{ isAuthenticated, user, login, logout, loading }}>

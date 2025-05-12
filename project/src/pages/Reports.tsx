@@ -17,11 +17,9 @@ import {
   Users,
   TrendingUp,
   Shield,
-  Activity,
-  HelpCircle
+  Activity
 } from 'lucide-react';
 import { TaskType, ReportFilter, TaskStatus, DashboardMetrics } from '../types';
-import Joyride, { Step } from 'react-joyride';
 
 const Reports = () => {
   const { tasks, duplicateTasks, metrics, loading } = useTasks();
@@ -35,35 +33,6 @@ const Reports = () => {
   
   const [isGenerating, setIsGenerating] = useState(false);
   const [isFiltersExpanded, setIsFiltersExpanded] = useState(true);
-  const [tourOpen, setTourOpen] = useState(false);
-
-  const tourSteps: Step[] = [
-    {
-      target: '.main-navbar',
-      content: 'Use the navigation bar to access all major sections.',
-      placement: 'bottom',
-    },
-    {
-      target: '.report-filters',
-      content: 'Set your filters to generate custom reports.',
-      placement: 'bottom',
-    },
-    {
-      target: '.report-summary-cards',
-      content: 'These cards show key report metrics.',
-      placement: 'bottom',
-    },
-    {
-      target: '.report-preview',
-      content: 'Preview your report here before downloading.',
-      placement: 'top',
-    },
-    {
-      target: '.download-report-btn',
-      content: 'Download your report as a PDF.',
-      placement: 'left',
-    },
-  ];
 
   // Filter data based on selected filters
   const filteredData = useMemo(() => {
@@ -176,40 +145,14 @@ const Reports = () => {
   };
 
   return (
-    <div className="space-y-6 relative">
-      {/* Onboarding Tour */}
-      {/* @ts-expect-error Joyride JSX type incompatibility workaround */}
-      <Joyride
-        steps={tourSteps}
-        run={tourOpen}
-        continuous
-        showSkipButton
-        showProgress
-        styles={{ options: { zIndex: 10000 } }}
-        callback={(data) => {
-          if (data.status === 'finished' || data.status === 'skipped') {
-            setTourOpen(false);
-          }
-        }}
-      />
-      {/* Subtle Help Icon Button in the top-right corner */}
-      <button
-        className="fixed top-6 right-8 z-50 bg-white/80 hover:bg-hsbc-primary/90 text-hsbc-primary hover:text-white rounded-full p-2 shadow transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-hsbc-primary group"
-        style={{ boxShadow: '0 2px 8px 0 rgba(0,0,0,0.04)' }}
-        onClick={() => setTourOpen(true)}
-        aria-label="Take a tour"
-        title="Take a tour"
-      >
-        <HelpCircle size={22} className="transition-colors duration-200" />
-        <span className="sr-only">Take a tour</span>
-      </button>
+    <div className="space-y-6">
       {/* Header section with gradient background */}
       <div className="relative overflow-hidden bg-gradient-to-r from-hsbc-primary via-hsbc-dark to-hsbc-primary rounded-2xl shadow-xl p-8 animate-fade-in">
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-white opacity-5 rounded-full animate-float" style={{ animationDelay: '0s' }} />
           <div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-white opacity-5 rounded-full animate-float" style={{ animationDelay: '2s' }} />
         </div>
-        <div className="relative flex flex-col md:flex-row justify-between items-start md:items-center main-navbar">
+        <div className="relative flex flex-col md:flex-row justify-between items-start md:items-center">
           <div className="flex items-center">
             <div className="rounded-full bg-white/10 p-3 mr-4 backdrop-blur-sm">
               <FileText size={24} className="text-white" />
@@ -224,7 +167,7 @@ const Reports = () => {
           <button
             onClick={handleGeneratePdf}
             disabled={isGenerating || loading}
-            className="mt-4 md:mt-0 inline-flex items-center px-6 py-3 border border-transparent rounded-xl shadow-lg text-sm font-medium text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-all duration-300 group disabled:opacity-50 disabled:cursor-not-allowed download-report-btn"
+            className="mt-4 md:mt-0 inline-flex items-center px-6 py-3 border border-transparent rounded-xl shadow-lg text-sm font-medium text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-all duration-300 group disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isGenerating ? (
               <>
@@ -242,7 +185,7 @@ const Reports = () => {
         </div>
         
         {/* Report filters */}
-      <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden animate-fade-in report-filters">
+      <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden animate-fade-in">
         <button
           onClick={() => setIsFiltersExpanded(!isFiltersExpanded)}
           className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors duration-200"
@@ -320,7 +263,7 @@ const Reports = () => {
         </div>
         
         {/* Report preview */}
-      <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden animate-fade-in report-preview">
+      <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden animate-fade-in">
         <div className="bg-gradient-to-r from-hsbc-primary to-hsbc-dark p-6">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
             <div>
@@ -344,7 +287,7 @@ const Reports = () => {
         
         <div className="p-6 space-y-8">
           {/* Summary metrics */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 report-summary-cards">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-shadow duration-300 animate-scale-in group">
               <div className="flex items-center">
                 <div className="rounded-full bg-hsbc-primary/10 p-3 mr-4 group-hover:scale-110 transition-transform duration-300">
@@ -659,7 +602,7 @@ const Reports = () => {
                       </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Distribution
-                      </th>
+                    </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -822,7 +765,7 @@ const Reports = () => {
           <button
             onClick={handleGeneratePdf}
             disabled={isGenerating || loading}
-          className="inline-flex items-center px-6 py-3 border border-transparent rounded-xl shadow-lg text-sm font-medium text-white bg-hsbc-primary hover:bg-hsbc-dark transition-all duration-300 group disabled:opacity-50 disabled:cursor-not-allowed download-report-btn"
+          className="inline-flex items-center px-6 py-3 border border-transparent rounded-xl shadow-lg text-sm font-medium text-white bg-hsbc-primary hover:bg-hsbc-dark transition-all duration-300 group disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isGenerating ? (
               <>

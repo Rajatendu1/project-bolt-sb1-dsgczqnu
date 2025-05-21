@@ -65,8 +65,8 @@ BankFlowAI is an innovative internal banking workflow management solution develo
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/bankflowai.git
-   cd bankflowai
+   git clone https://github.com/Rajatendu1/project-bolt-sb1-dsgczqnu.git
+   cd project-bolt-sb1-dsgczqnu
    ```
 
 2. Install dependencies:
@@ -155,7 +155,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👥 Team
 
-- **Rajatendu** - *Lead Developer* - [GitHub](https://github.com/yourusername)
+- **Rajatendu** - *Lead Developer* - [GitHub](https://github.com/Rajatendu1)
 
 ## 🙏 Acknowledgments
 

@@ -77,45 +77,86 @@ export const generateMockTasks = (count: number): Task[] => {
   const tasks: Task[] = [];
   const taskTypes: TaskType[] = ['loan-approval', 'kyc-check', 'transaction-review', 'account-opening', 'credit-check'];
   const statuses: TaskStatus[] = ['pending', 'in-progress', 'completed', 'cancelled'];
-  
+  const priorities: ('low' | 'medium' | 'high')[] = ['low', 'medium', 'high'];
+  const assignees = ['John Smith', 'Emma Wilson', 'Michael Chen', 'Priya Patel'];
+
+  // Generate a pool of customer IDs, some with higher task volume
+  const customerPool: string[] = Array.from({ length: Math.floor(count / 5) }, generateCustomerId);
+
+  // Helper to get SLA (overdue) for a task
+  const getSLA = (taskType: TaskType, priority: 'low' | 'medium' | 'high') => {
+    const thresholds = {
+      'loan-approval': { high: 4, medium: 8, low: 24 },
+      'kyc-check': { high: 2, medium: 4, low: 8 },
+      'transaction-review': { high: 1, medium: 2, low: 4 },
+      'account-opening': { high: 2, medium: 4, low: 8 },
+      'credit-check': { high: 4, medium: 8, low: 24 }
+    };
+    return thresholds[taskType][priority] * 60; // minutes
+  };
+
   // Generate initial tasks
   for (let i = 0; i < count * 0.8; i++) {
     const taskType = taskTypes[Math.floor(Math.random() * taskTypes.length)];
     const descTemplate = taskDescriptions[taskType][Math.floor(Math.random() * taskDescriptions[taskType].length)];
-    const customerId = generateCustomerId();
-    
-    // Add customer ID to description if template contains placeholder
+    // Some customers get more tasks
+    const customerId = customerPool[Math.floor(Math.pow(Math.random(), 2) * customerPool.length)];
     const description = descTemplate.includes('for customer') || descTemplate.includes('for client')
       ? descTemplate.replace(/for (customer|client)/, `for ${customerId}`)
       : `${descTemplate} ${customerId}`;
-    
+    const status = statuses[Math.floor(Math.random() * statuses.length)];
+    const priority = priorities[Math.floor(Math.random() * priorities.length)];
+    const assignedTo = assignees[Math.floor(Math.random() * assignees.length)];
+    const timestamp = generateRecentTimestamp();
+
+    // Realistic completion time for completed tasks
+    let completionTime: number | undefined = undefined;
+    if (status === 'completed') {
+      const sla = getSLA(taskType, priority);
+      // 70% within SLA, 30% over SLA
+      if (Math.random() < 0.7) {
+        completionTime = Math.round(sla * (0.5 + Math.random() * 0.5)); // 50-100% of SLA
+      } else {
+        completionTime = Math.round(sla * (1 + Math.random() * 0.5)); // 100-150% of SLA
+      }
+    }
+
     tasks.push({
       id: Math.random().toString(36).substring(2, 11),
       customerId,
       taskType,
       description,
-      status: statuses[Math.floor(Math.random() * statuses.length)],
-      timestamp: generateRecentTimestamp(),
-      priority: ['low', 'medium', 'high'][Math.floor(Math.random() * 3)] as 'low' | 'medium' | 'high',
-      assignedTo: ['John Smith', 'Emma Wilson', 'Michael Chen', 'Priya Patel'][Math.floor(Math.random() * 4)]
+      status,
+      timestamp,
+      priority,
+      assignedTo,
+      ...(completionTime !== undefined ? { completionTime } : {})
     });
   }
   
-  // Add some duplicate/similar tasks (about 20% of total)
-  const duplicatesCount = count - tasks.length;
+  // Add some duplicate/similar tasks (about 5% of total)
+  const duplicatesCount = Math.floor(count * 0.05);
   for (let i = 0; i < duplicatesCount; i++) {
     // Randomly pick an existing task to duplicate
     const originalTask = tasks[Math.floor(Math.random() * tasks.length)];
-    
-    // Create a duplicate with slight variations
+    const status = statuses[Math.floor(Math.random() * statuses.length)];
+    let completionTime: number | undefined = undefined;
+    if (status === 'completed') {
+      const sla = getSLA(originalTask.taskType, originalTask.priority || 'medium');
+      if (Math.random() < 0.7) {
+        completionTime = Math.round(sla * (0.5 + Math.random() * 0.5));
+      } else {
+        completionTime = Math.round(sla * (1 + Math.random() * 0.5));
+      }
+    }
     const duplicateTask: Task = {
       ...originalTask,
       id: Math.random().toString(36).substring(2, 11),
       description: createSimilarDescription(originalTask.description),
-      timestamp: generateRecentTimestamp(), // Different timestamp
-      status: statuses[Math.floor(Math.random() * statuses.length)], // Possibly different status
+      timestamp: generateRecentTimestamp(),
+      status,
+      ...(completionTime !== undefined ? { completionTime } : {})
     };
-    
     tasks.push(duplicateTask);
   }
   

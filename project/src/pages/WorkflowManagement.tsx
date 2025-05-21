@@ -242,11 +242,21 @@ const WorkflowManagement = () => {
   // Handle updating a task
   const handleUpdateTask = (e: React.FormEvent) => {
     e.preventDefault();
-    if (editingTask) {
-      updateTask(editingTask.id, editingTask);
-      setEditingTask(null);
-      setShowEditForm(false);
+    if (!editingTask) return;
+
+    const updatedTask = { ...editingTask };
+    
+    // Calculate completion time if status is being changed to completed
+    if (updatedTask.status === 'completed' && !updatedTask.completionTime) {
+      const taskStartTime = new Date(updatedTask.timestamp).getTime();
+      const now = new Date().getTime();
+      const completionTimeMinutes = Math.round((now - taskStartTime) / (1000 * 60));
+      updatedTask.completionTime = completionTimeMinutes;
     }
+
+    updateTask(updatedTask.id, updatedTask);
+    setShowEditForm(false);
+    setEditingTask(null);
   };
   
   // Check if task is flagged as duplicate

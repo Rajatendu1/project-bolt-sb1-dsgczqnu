@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import { Chart as ChartJS, ArcElement, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, PointElement, LineElement, RadialLinearScale } from 'chart.js';
 import { Bar, Pie, Line, Radar } from 'react-chartjs-2';
+import { detectDuplicates, TIME_THRESHOLDS } from '../utils/aiEngine';
 
 // Register ChartJS components
 ChartJS.register(ArcElement, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, PointElement, LineElement, RadialLinearScale);
@@ -236,7 +237,16 @@ const Dashboard = () => {
               <p className="text-sm font-medium text-gray-500 mb-1">SLA Compliance</p>
               <h3 className="text-2xl font-bold text-gray-800">
                 {metrics.totalTasks > 0
-                  ? Math.round((tasks.filter(task => task.status === 'completed' && (task.completionTime || 0) <= 30).length / metrics.totalTasks) * 100)
+                  ? (() => {
+                      const compliant = tasks.filter(task => {
+                        if (task.status !== 'completed' || !task.completionTime) return false;
+                        const priority = task.priority || 'medium';
+                        const thresholds = TIME_THRESHOLDS[task.taskType][priority];
+                        const slaMinutes = thresholds.overdue * 60;
+                        return task.completionTime <= slaMinutes;
+                      }).length;
+                      return Math.round((compliant / metrics.totalTasks) * 100);
+                    })()
                   : 0}%
               </h3>
             </div>
@@ -759,13 +769,14 @@ const Dashboard = () => {
             {/* Customer Risk Assessment */}
             <div>
               <h3 className="text-sm font-medium text-gray-600 mb-3">Customer Risk Assessment</h3>
-              <div className="h-40">
+              <div className="h-64">
                 <Radar 
                   data={{
                     labels: ['Task Volume', 'Duplicate Rate', 'Completion Time', 'SLA Compliance', 'Risk Score'],
                     datasets: [{
                       label: 'Average Customer Profile',
                       data: useMemo(() => {
+                        const MAX_COMPLETION_TIME = 120; // 120 minutes (2 hours) as reasonable max
                         const customerMetrics = tasks.reduce((acc, task) => {
                           if (!acc[task.customerId]) {
                             acc[task.customerId] = {
@@ -795,13 +806,18 @@ const Dashboard = () => {
                           return acc;
                         }, {} as Record<string, number>);
 
-                        const metrics = Object.entries(customerMetrics).map(([customerId, metrics]) => ({
-                          taskVolume: metrics.taskCount,
-                          duplicateRate: (duplicateCounts[customerId] || 0) / metrics.taskCount,
-                          completionTime: metrics.completedCount ? metrics.completionTime / metrics.completedCount : 0,
-                          slaCompliance: metrics.completedCount ? metrics.slaCompliantCount / metrics.completedCount : 0,
-                          riskScore: (duplicateCounts[customerId] || 0) / metrics.taskCount
-                        }));
+                        const metrics = Object.entries(customerMetrics).map(([customerId, metrics]) => {
+                          const avgCompletion = metrics.completedCount ? metrics.completionTime / metrics.completedCount : 0;
+                          // Normalize completion time: 100 is best (fastest), 0 is slowest
+                          const normalizedCompletion = Math.max(0, 100 - (avgCompletion / MAX_COMPLETION_TIME) * 100);
+                          return {
+                            taskVolume: metrics.taskCount,
+                            duplicateRate: (duplicateCounts[customerId] || 0) / metrics.taskCount,
+                            completionTime: normalizedCompletion,
+                            slaCompliance: metrics.completedCount ? metrics.slaCompliantCount / metrics.completedCount : 0,
+                            riskScore: (duplicateCounts[customerId] || 0) / metrics.taskCount
+                          };
+                        });
 
                         const averages = metrics.reduce((acc, curr) => ({
                           taskVolume: acc.taskVolume + curr.taskVolume,
@@ -837,11 +853,16 @@ const Dashboard = () => {
                   options={{
                     responsive: true,
                     maintainAspectRatio: false,
+                    layout: { padding: 30 }, // Add padding to prevent lines from crossing text
                     scales: {
                       r: {
                         beginAtZero: true,
                         max: 100,
-                        ticks: { display: false }
+                        ticks: { display: false },
+                        pointLabels: {
+                          font: { size: 14 },
+                          padding: 16 // More space for labels
+                        }
                       }
                     },
                     plugins: {
@@ -849,7 +870,7 @@ const Dashboard = () => {
                       tooltip: {
                         callbacks: {
                           label: (context) => {
-                            const labels = ['tasks', '%', 'minutes', '%', '%'];
+                            const labels = ['tasks', '%', 'score', '%', '%'];
                             return `${context.raw}${labels[context.dataIndex]}`;
                           }
                         }

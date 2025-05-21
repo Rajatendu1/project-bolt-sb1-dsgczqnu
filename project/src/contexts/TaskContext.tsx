@@ -45,10 +45,27 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     // Check if tasks exist in localStorage
     const storedTasks = localStorage.getItem('bankflowai_tasks');
-    
+    let parsedTasks;
     if (storedTasks) {
       try {
-        const parsedTasks = JSON.parse(storedTasks);
+        parsedTasks = JSON.parse(storedTasks);
+        // MIGRATION: Set completionTime for completed tasks without it
+        let updated = false;
+        const now = new Date().getTime();
+        parsedTasks = parsedTasks.map((task: any) => {
+          if (task.status === 'completed' && (task.completionTime === undefined || task.completionTime === null)) {
+            const start = new Date(task.timestamp).getTime();
+            // Only set if timestamp is valid
+            if (!isNaN(start)) {
+              task.completionTime = Math.round((now - start) / (1000 * 60));
+              updated = true;
+            }
+          }
+          return task;
+        });
+        if (updated) {
+          localStorage.setItem('bankflowai_tasks', JSON.stringify(parsedTasks));
+        }
         setTasks(parsedTasks);
       } catch (error) {
         console.error('Error parsing stored tasks:', error);
@@ -63,7 +80,6 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
       setTasks(initialTasks);
       localStorage.setItem('bankflowai_tasks', JSON.stringify(initialTasks));
     }
-    
     setLoading(false);
   }, []);
 

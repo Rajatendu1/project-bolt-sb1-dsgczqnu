@@ -155,7 +155,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👥 Team
 
-- **Rajatendu** - *Lead Developer* - [GitHub](https://github.com/Rajatendu1)
+- **Rajatendu Dey** - *Lead Developer* - [GitHub](https://github.com/Rajatendu1)
+- **Sai Praneeth Varma** - *Tester*
+- **Shubham Kumar Tiwari** - *DevOps Engineer*
 
 ## 🙏 Acknowledgments
 
